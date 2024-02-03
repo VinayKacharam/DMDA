@@ -1,0 +1,179 @@
+CREATE TABLE "AIS_Member" (
+	"Member_ID"	INTEGER,
+	"MemberType"	TEXT,
+	"Code_of_Ethics_Agreement"	TEXT NOT NULL DEFAULT 'Y',
+	"Member_Email"	TEXT NOT NULL UNIQUE,
+	"Name"	TEXT NOT NULL,
+	"Phone"	TEXT NOT NULL UNIQUE,
+	CONSTRAINT "MEMBER_TYPE_CHECK" CHECK("MemberType" IN ('Student', 'Academic', 'Professional')),
+	CONSTRAINT "MEMBER_EMP_EMAIL_CHK" CHECK("Member_Email" LIKE '%_@%_.%_'),
+	CONSTRAINT "EMPLOYEE_ETHICS_CHK" CHECK("Code_of_Ethics_Agreement" IN ('Y', 'N')),
+	CONSTRAINT "AIS_Member_PK" PRIMARY KEY("Member_ID")
+);
+
+CREATE TABLE "Student" (
+	"Member_ID"	INTEGER,
+	"Dissertation_Title"	TEXT,
+	"School"	TEXT,
+	CONSTRAINT "Student_FK" FOREIGN KEY("Member_ID") REFERENCES "AIS_Member"("Member_ID"),
+	CONSTRAINT "Student_PK" PRIMARY KEY("Member_ID")
+);
+
+CREATE TABLE "Academic" (
+	"Member_ID"	INTEGER,
+	"Rank"	TEXT,
+	"School"	TEXT,
+	CONSTRAINT "Academic_FK" FOREIGN KEY("Member_ID") REFERENCES "AIS_Member"("Member_ID"),
+	CONSTRAINT "Academic_PK" PRIMARY KEY("Member_ID")
+);
+
+CREATE TABLE "Professional" (
+	"Member_ID"	INTEGER,
+	"Title"	TEXT,
+	"Organization"	TEXT,
+	CONSTRAINT "Professional_PK" PRIMARY KEY("Member_ID"),
+	CONSTRAINT "Professional_FK" FOREIGN KEY("Member_ID") REFERENCES "AIS_Member"("Member_ID")
+);
+CREATE TABLE "Conference" (
+	"Conference_ID"	INTEGER,
+	"Category"	TEXT NOT NULL DEFAULT 'Domestic',
+	"Location"	TEXT,
+	"Name"	TEXT NOT NULL,
+	"Date"	DATE NOT NULL,
+	CONSTRAINT "CONFERENCE_CATEGORY_CHK" CHECK("Category" IN ('International', 'Domestic', 'Combined')),
+	CONSTRAINT "Conference_PK" PRIMARY KEY("Conference_ID")
+);
+CREATE TABLE "Conference_Registration" (
+	"ConferenceRegistration_ID"	INTEGER,
+	"Member_ID"	INTEGER,
+	"Conference_ID"	INTEGER,
+	"Date"	DATE,
+	CONSTRAINT "Conference_Registration_PK" PRIMARY KEY("ConferenceRegistration_ID"),
+	CONSTRAINT "Conference_Registration_FK1" FOREIGN KEY("Member_ID") REFERENCES "AIS_Member"("Member_ID"),
+	CONSTRAINT "Conference_Registration_FK2" FOREIGN KEY("Conference_ID") REFERENCES "Conference"("Conference_ID")
+);
+CREATE TABLE "Membership_Renewal" (
+	"Renewal_ID"	INTEGER,
+	"Member_ID"	INTEGER,
+	"Date"	DATE NOT NULL DEFAULT CURRENT_DATE,
+	"Price"	NUMERIC NOT NULL,
+	CONSTRAINT "Membership_Renewal_PK" PRIMARY KEY("Renewal_ID"),
+CONSTRAINT "Membership_Renewal_FK" FOREIGN KEY("Member_ID") REFERENCES "AIS_Member"("Member_ID"),
+	CONSTRAINT "RENEWAL_PRICE_LOWER_LIMIT_CHK" CHECK("Price" >= 100),
+	CONSTRAINT "RENEWAL_PRICE_UPPER_LIMIT_CHK" CHECK("Price" <= 1000),
+	CONSTRAINT "RENEWAL_DATE_LOWER_LIMIT_CHK" CHECK("Date" >= '2000-01-01')
+);
+CREATE TABLE "SIG_Membership" (
+	"SIG_Membership_ID"	INTEGER,
+	"Renewal_ID"	INTEGER,
+	"Name"	TEXT,
+	"SIG_Code"	TEXT UNIQUE,
+	CONSTRAINT "SIG_Membership_PK" PRIMARY KEY("SIG_Membership_ID"),
+	CONSTRAINT "SIG_Membership_FK" FOREIGN KEY("Renewal_ID") REFERENCES "Membership_Renewal"("Renewal_ID"),
+	CONSTRAINT "SIG_Code_Pattern_chk" CHECK("SIG_Code" LIKE 'SIG%' AND LENGTH("SIG_Code") >= 7)
+);
+
+
+DROP TABLE if EXISTS "AIS_Member";
+DROP TABLE if EXISTS "Student";
+DROP TABLE if EXISTS "Academic";
+DROP TABLE if EXISTS "Professional";
+DROP TABLE if EXISTS "Membership_Renewal";
+DROP TABLE if EXISTS "SIG_Membership";
+DROP TABLE if EXISTS "Conference";
+DROP TABLE if EXISTS "Conference_Registration";
+
+
+
+INSERT INTO "AIS_Member" ("Member_ID","MemberType","Code_of_Ethics_Agreement","Member_Email","Name","Phone")
+VALUES
+(811354, 'Academic', 'Y', 'jocadk@ais.com', 'Jocad', '3385785544'),
+(811355, 'Student', 'Y', 'nickjohn@ais.com', 'Nick John', '2314451578'),
+(811356, 'Academic', 'N', 'pavanreddy@ais.com', 'Pavan Reddy', '3385785578'),
+(811357, 'Professional', 'Y', 'johnandro@ais.com', 'John Andro', '3385755845'),
+(811358, 'Professional', 'Y', 'micheljohn@ais.com', 'Michel John', '3395786645'),
+(811359, 'Academic', 'Y', 'vivekkumar@ais.com', 'Vivek Kumar', '3585643456'),
+(811360, 'Student', 'Y', 'vinayrao@ais.com', 'Vinay Rao', '3585645486'),
+(811361, 'Professional', 'N', 'samuelrekala@ais.com', 'Samuel Rekala', '3585648792'),
+(811362, 'Student', 'N', 'vijayreddy@ais.com', 'Vijay Reddy', '3585645472'),
+(811363, 'Professional', 'Y', 'manikanta@ais.com', 'Manikanta', '3585646442');
+
+
+
+INSERT INTO "Student" ("Member_ID","Dissertation_Title","School")
+VALUES
+(811355,'Business Analytics','School of Business Analytics'),
+(811360,'Public Health','School of Public Health'),
+(811362,'Computer Science','School of Computer Science');
+
+
+
+INSERT INTO "Academic" ("Member_ID","Rank","School")
+VALUES
+(811354,'Assistant Professor','School of Management'),
+(811356,'Head of Department of Accounts','School of Accounts'),
+(811359,'professor in Computer Science','School of Computer Science');
+
+
+INSERT INTO "Professional" ("Member_ID","Title","Organization")
+VALUES
+(811357,'Manager','Vin Pvt.ltd'),
+(811358,'CEO','XYZ Industry'),
+(811361,'Bank Manager','ABC Bank'),
+(811363,'Chief Accounts Officer ','U&V Company');
+
+
+
+
+INSERT INTO "Membership_Renewal" ("Renewal_ID", "Member_ID", "Date", "Price")
+VALUES
+    (154001, 811354, '2023-10-01', 900),
+    (154002, 811355, '2023-03-02', 900),
+    (154003, 811356, '2023-03-04', 900),
+    (154004, 811357, '2023-10-02', 900),
+    (154005, 811358, '2023-02-19', 900),
+    (154006, 811359, '2023-01-15', 900),
+    (154007, 811360, '2023-03-10', 900),
+    (154008, 811361, '2023-02-12', 900),
+    (154009, 811362, '2023-03-15', 900),
+    (154010, 811363, '2023-05-15', 900);
+
+INSERT INTO "SIG_Membership" ("SIG_Membership_ID","Renewal_ID", "Name", "SIG_Code")
+VALUES
+(1659,154001, 'Jocad', 'SIG0153'),
+(1660,154002, 'Nick John', 'SIG0154'),
+(1661,154003, 'Pavan Reddy', 'SIG0155'),
+(1662,154004, 'John Andro', 'SIG0156'),
+(1663,154005, 'Michel John', 'SIG0157'),
+(1664,154006, 'Vivek Kumar', 'SIG0158'),
+(1665,154007, 'Vinay Rao', 'SIG0159'),
+(1666,154008, 'Samuel Rekala', 'SIG0160'),
+(1667,154009, 'Vijay Reddy', 'SIG0161'),
+(1668,154010, 'Manikanta', 'SIG0162');
+
+INSERT INTO Conference (Conference_ID, Category, Location, Name, Date)
+VALUES
+(2547, 'International', 'Singapur', 'Conference on Business', '2023-11-09'),
+(2545, 'Domestic', 'Newyork', 'Conference on Health Science', '2023-12-05'),
+(2546, 'Combined', 'Neyyork,India', 'Conference on Networking', '2023-11-20');
+
+INSERT INTO "Conference_Registration" ("ConferenceRegistration_ID", "Member_ID", "Conference_ID", "Date")
+VALUES
+(9874, 811354, 2547, '2023-11-09'),
+(9875, 811355, 2545, '2023-12-05'),
+(9876, 811356, 2547, '2023-11-09'),
+(9877, 811357, 2547, '2023-11-09'),
+(9878, 811358, 2547, '2023-11-09'),
+(9879, 811359, 2546, '2023-11-20'),
+(9880, 811360, 2547, '2023-11-09'),
+(9881, 811361, 2546, '2023-11-20'),
+(9882, 811362, 2545, '2023-12-05'),
+(9883, 811363, 2545, '2023-12-05');
+
+
+
+
+
+
+
+ 
